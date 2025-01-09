@@ -41,44 +41,57 @@ namespace VisanBC25
         {
             Console.Clear();
             Console.WriteLine(" 0. Test");
-            Console.WriteLine("--------------------------------------");
-            Console.WriteLine(" 1. Formas y Términos de Pago");
-            Console.WriteLine(" 2. Países");
-            Console.WriteLine(" 3. Clientes");
-            Console.WriteLine(" 4. Provedores");
-            Console.WriteLine(" 5. Bancos");
-            Console.WriteLine(" 6. Cuentas Contables");
-            Console.WriteLine(" 7. Activos Fijos");
-            Console.WriteLine(" 8. Dir. Envío");
-            Console.WriteLine(" 9. Bancos Clientes");
-            Console.WriteLine("10. Bancos Provedores");
-            Console.WriteLine("-------------------------------------");
-            Console.WriteLine("50. Diario");
-            Console.WriteLine("51. Facturas Venta");
-            Console.WriteLine("52. Facturas Compra");
-            Console.WriteLine("-------------------------------------");
+            Console.WriteLine(new string('-', 80));
+            Console.WriteLine(" 1. Formas y Términos de Pago\t\t\t\t3. VAT Posting Setup");
+            Console.WriteLine(" 2. Países\t\t\t\t4. FA Posting Group");
+            Console.WriteLine(new string('-', 80));
+            Console.WriteLine("10. Clientes\t\t\t\t15. AF Depr. Book");
+            Console.WriteLine("11. Provedores\t\t\t\t16. Dir. Envío");
+            Console.WriteLine("12. Bancos\t\t\t\t17. Bancos Clientes");
+            Console.WriteLine("13. Cuentas Contables\t\t\t18. Bancos Provedores");
+            Console.WriteLine("14. Activos Fijos");
+            Console.WriteLine(new string('-', 80));
+            Console.WriteLine("50. Facturas Venta\t\t\t51. Facturas Compra");
+            Console.WriteLine("52. Diario\t\t\t\t59. Diario Saldos Iniciales");
+            Console.WriteLine(new string('-', 80));
             Console.WriteLine("99. Salir");
-            Console.WriteLine("-------------------------------------");
+            Console.WriteLine(new string('-', 80));
+            Console.WriteLine("(+) al final = Borrar Datos Existentes (3+)");
+            Console.WriteLine();
             Console.Write("Pulse Opción: ");
+            
             string Opc = Console.ReadLine();
+            if (string.IsNullOrEmpty(Opc)) Opc = "99";
+
+            string Borrar = string.Empty;
+
+            if (Opc.Substring(Opc.Length - 1, 1) == "+")
+            {
+                Borrar = "+";
+                Opc = Opc.Substring(0, Opc.Length - 1);
+            }
 
             switch (Opc)
             {
-                case "99": return "SALIR";
-                case "0": return "TEST";
-                case "1": return "FPAGO";
-                case "2": return "PAISES";
-                case "3": return "CLIENTES";
-                case "4": return "PROVEEDORES";
-                case "5": return "BANCOS";
-                case "6": return "CUENTAS";
-                case "7": return "ACTIVOS";
-                case "8": return "DIRECCIONES";
-                case "9": return "BANCOS-CLI";
-                case "10": return "BANCOS-PRO";
-                case "50": return "DIARIO";
-                case "51": return "FAC-V";
-                case "52": return "FAC-C";
+                case "99": return $"SALIR{Borrar}";
+                case "0": return $"TEST";
+                case "1": return $"FPAGO{Borrar}";
+                case "2": return $"PAISES{Borrar}";
+                case "3": return $"VAT-SETUP{Borrar}";
+                case "4": return $"FA-POST{Borrar}";
+                case "10": return $"CLIENTES{Borrar}";
+                case "11": return $"PROVEEDORES{Borrar}";
+                case "12": return $"BANCOS{Borrar}";
+                case "13": return $"CUENTAS{Borrar}";
+                case "14": return $"ACTIVOS{Borrar}";
+                case "15": return $"FA-BOOK{Borrar}";
+                case "16": return $"DIRECCIONES{Borrar}";
+                case "17": return $"BANCOS-CLI{Borrar}";
+                case "18": return $"BANCOS-PRO{Borrar}";
+                case "50": return $"FAC-V{Borrar}";
+                case "51": return $"FAC-C{Borrar}";
+                case "52": return $"DIARIO{Borrar}";
+                case "59": return $"SALDOS{Borrar}";
             }
 
             return "ERROR";
@@ -263,6 +276,7 @@ namespace VisanBC25
 
         public static async Task<bool> Insertar_Error(m_Datos Datos, Sql s, string xTabla, string xClave, string Texto)
         {
+            Texto = Texto.Replace("'", " ");
             string tt = $"INSERT INTO [{Datos.Company}$Errores BC25] ([Fecha], [Tabla], [Clave], [Error]) VALUES ( GETDATE(), '{xTabla}', '{xClave}', '{Texto}')";
             if (!await s.Ejecutar_SQL(Datos, tt))
             {

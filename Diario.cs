@@ -22,16 +22,56 @@ namespace VisanBC25
 {
     public class Diario
     {
-        public async Task<m_Datos> Traspasar_Diario(m_Datos Datos)
+        public async Task<m_Datos> Traspasar_Diario(m_Datos Datos, bool Saldos, bool Borrar)
         {
             int Counter = 0;
             int CounterOK = 0;
             TimeSpan start = DateTime.Now.TimeOfDay;
             TimeSpan stop = DateTime.Now.TimeOfDay;
 
+            if (Saldos || Borrar)
+            {
+                m_Borrar BorrarClass = new m_Borrar();
+
+                string xjson = JsonConvert.SerializeObject(BorrarClass, Formatting.Indented);
+                m_Respuesta RespuestaWs = new m_Respuesta();
+
+                if (Saldos)
+                {
+                    RespuestaWs = await oData.WsJson(Datos, xjson, "Borrar_Diario_Saldos");
+                }
+                else
+                {
+                    RespuestaWs = await oData.WsJson(Datos, xjson, "Borrar_Diario");
+                }
+
+                if (RespuestaWs.Ok)
+                {
+                    Console.WriteLine($"\r\n\r\nBorrados: {RespuestaWs.Respuesta} Registros");
+                    await Funciones.Log(Datos, $"Borrar Diario: {RespuestaWs.Respuesta} Borrados");
+
+                }
+                else
+                {
+                    Console.WriteLine($"\r\n\r\nNo se han podido Borrar Registros: {RespuestaWs.Respuesta}");
+                    await Funciones.Log(Datos, $"Error Borrando Diario (Saldos={Saldos}): {RespuestaWs.Respuesta}");
+                    Datos.Estado = false;
+                    Datos.Error = $"No se han podido Borrar Registros: {RespuestaWs.Respuesta}";
+                    return Datos;
+                }
+            }
+
+
             string tt = await Funciones.Crear_Select(Datos, "Gen_ Journal Line");
 
-            tt += $" WHERE [Exportado BC25] = 0";
+            if (Saldos)
+            {
+                tt += $" WHERE [Exportado BC25] = 0 AND [Journal Batch Name] = 'SALDOS'";
+            }
+            else
+            {
+                tt += $" WHERE [Exportado BC25] = 0 AND [Journal Batch Name] <> 'SALDOS' AND YEAR([Posting Date])>=2025";
+            }
 
             Sql s = new Sql();
             await s.Cargar_TableData(Datos, tt);

@@ -22,8 +22,7 @@ namespace VisanBC25
     public class FacturasVentas
     {
 
-
-        public async Task<m_Datos> Traspasar_Facturas_Ventas(m_Datos Datos)
+        public async Task<m_Datos> Traspasar_Facturas_Ventas(m_Datos Datos, bool Borrar)
         {
             int Counter = 0;
             int Counter2 = 0;
@@ -31,8 +30,34 @@ namespace VisanBC25
             TimeSpan start = DateTime.Now.TimeOfDay;
             TimeSpan stop = DateTime.Now.TimeOfDay;
 
+            if (Borrar)
+            {
+                m_Borrar BorrarClass = new m_Borrar();
+
+                string xjson = JsonConvert.SerializeObject(BorrarClass, Formatting.Indented);
+                m_Respuesta RespuestaWs = new m_Respuesta();
+
+                RespuestaWs = await oData.WsJson(Datos, xjson, "Borrar_Facturas_Venta");
+
+                if (RespuestaWs.Ok)
+                {
+                    Console.WriteLine($"\r\n\r\nBorrados: {RespuestaWs.Respuesta} Registros");
+                    await Funciones.Log(Datos, $"Facturas Venta: {RespuestaWs.Respuesta} Borradas");
+
+                }
+                else
+                {
+                    Console.WriteLine($"\r\n\r\nNo se han podido Borrar Registros: {RespuestaWs.Respuesta}");
+                    await Funciones.Log(Datos, $"Error Borrando Facturas Venta: {RespuestaWs.Respuesta}");
+
+                    Datos.Estado = false;
+                    Datos.Error = $"No se han podido Borrar Registros: {RespuestaWs.Respuesta}";
+                    return Datos;
+                }
+            }
+
             string tt = await Funciones.Crear_Select(Datos, "Sales Header");
-            tt += @$" WHERE [Document Type] in (2,3) AND [Exportado BC25] = 0
+            tt += @$" WHERE [Document Type] in (2,3) AND [Exportado BC25] = 0 AND YEAR([Posting Date])>=2025
                      AND EXISTS ( SELECT * FROM [{Datos.Company}$Sales Line]
                                     WHERE [Document Type] = [{Datos.Company}$Sales Header].[Document Type] and [Document No_] = [{Datos.Company}$Sales Header].[No_])";
 
@@ -92,6 +117,7 @@ namespace VisanBC25
 
                         m_Respuesta RespuestaWs = new m_Respuesta();
                         RespuestaWs = await oData.WsJson(Datos, xjson, "Facturas_Venta");
+
                         if (RespuestaWs.Ok)
                         {
                             CounterOK++;
@@ -105,7 +131,7 @@ namespace VisanBC25
                         }
 
                         stop = DateTime.Now.TimeOfDay - start;
-                        Console.Write($"\r  Registros: {Counter}/{s.mSql.TableData.Rows.Count}  Líneas:{Counter2}        OK: {CounterOK}   Error: {Counter-CounterOK}    Tiempo: {stop.Hours}:{stop.Minutes}:{stop.Seconds}");
+                        Console.Write($"\rRegistros: {Counter}/{s.mSql.TableData.Rows.Count}  Líneas:{Counter2}        OK: {CounterOK}   Error: {Counter-CounterOK}    Tiempo: {stop.Hours}:{stop.Minutes}:{stop.Seconds}");
                     }
                 }
                 catch (Exception ex)

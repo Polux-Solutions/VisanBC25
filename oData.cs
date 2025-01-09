@@ -40,7 +40,6 @@ namespace VisanBC25
                     }
                 }
 
-                
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
                 if (response.StatusCode == HttpStatusCode.OK)
