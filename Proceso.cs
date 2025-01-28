@@ -67,6 +67,14 @@ namespace VisanBC25
                         FacturasCompras f = new FacturasCompras();
                         await f.Traspasar_Facturas_Compras(Datos, Borrar);
                         break;
+                    case "REMESA":
+                        Cartera g = new Cartera();
+                        await g.Traspasar_Remesas(Datos, Borrar);
+                        break;
+                    case "OPAGO":
+                        Cartera h = new Cartera();
+                        await h.Traspasar_Ordenes_Pago(Datos, Borrar);
+                        break;
                 }
 
                 if (!Datos.Estado)

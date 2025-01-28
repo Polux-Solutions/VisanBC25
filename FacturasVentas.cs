@@ -61,6 +61,9 @@ namespace VisanBC25
                      AND EXISTS ( SELECT * FROM [{Datos.Company}$Sales Line]
                                     WHERE [Document Type] = [{Datos.Company}$Sales Header].[Document Type] and [Document No_] = [{Datos.Company}$Sales Header].[No_])";
 
+
+            //AND[No_] IN('25/A-00001', '25/A-00006')
+
             Sql s = new Sql();
             await s.Cargar_TableData(Datos, tt);
             if (s.mSql.Estado)
@@ -150,7 +153,7 @@ namespace VisanBC25
         }
 
 
-        private async Task<bool>Marcar_Documento_Exportado(m_Datos Datos, Sql s, int xDocumentType, string xFacturaNo)
+        private async Task<bool> Marcar_Documento_Exportado(m_Datos Datos, Sql s, int xDocumentType, string xFacturaNo)
         {
             string tt = $@"UPDATE [{Datos.Company}$Sales Header]  
                             SET [Exportado BC25] = 1

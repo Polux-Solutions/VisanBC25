@@ -66,11 +66,11 @@ namespace VisanBC25
 
             if (Saldos)
             {
-                tt += $" WHERE [Exportado BC25] = 0 AND [Journal Batch Name] = 'SALDOS'";
+                tt += $" WHERE [Exportado BC25] = 0 AND [Document No_] <> '' AND [Journal Batch Name] IN ('MIGRACION', 'MIGRACPROV')";
             }
             else
             {
-                tt += $" WHERE [Exportado BC25] = 0 AND [Journal Batch Name] <> 'SALDOS' AND YEAR([Posting Date])>=2025";
+                tt += $" WHERE [Exportado BC25] = 0 AND [Document No_] <> '' AND NOT [Journal Batch Name] IN ('MIGRACION', 'MIGRACPROV') AND YEAR([Posting Date])>=2025";
             }
 
             Sql s = new Sql();
@@ -104,9 +104,13 @@ namespace VisanBC25
                         {
                             await Task.Delay(1000);
                             stop = DateTime.Now.TimeOfDay - start;
-                            Console.Write($"\r  Registros: {Counter}/{s.mSql.TableData.Rows.Count}  OK: {CounterOK}   Error: {Counter - CounterOK}    Tiempo: {stop.Hours}:{stop.Minutes}:{stop.Seconds}");
+                            Console.Write($"\rRegistros: {Counter}/{s.mSql.TableData.Rows.Count}  OK: {CounterOK}   Error: {Counter - CounterOK}    Tiempo: {stop.Hours}:{stop.Minutes}:{stop.Seconds}");
                         }
                     }
+
+                    stop = DateTime.Now.TimeOfDay - start;
+                    Console.WriteLine($"\r\nFin Transferencia Registros: {Counter}   OK: {CounterOK}  Error: {Counter - CounterOK}    Tiempo:{stop.Minutes}:{stop.Seconds}.{stop.Milliseconds}");
+
                 }
                 catch (Exception ex)
                 {
@@ -139,8 +143,5 @@ namespace VisanBC25
 
             return (true);
         }
-
-
-
     }
 }

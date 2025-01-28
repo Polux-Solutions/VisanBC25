@@ -58,9 +58,11 @@ namespace VisanBC25
 
 
             string tt = await Funciones.Crear_Select(Datos, "Purchase Header");
-            tt += @$" WHERE [Document Type] in (2,3) AND [Exportado BC25] = 0 AND YEAR([Posting Date])>=2025
-                     AND EXISTS ( SELECT * FROM [{Datos.Company}$Purchase Line]
+            tt += @$" WHERE [Document Type] in (2,3) AND [Exportado BC25] in (0) AND YEAR([Posting Date])>=2025
+                        AND EXISTS ( SELECT * FROM [{Datos.Company}$Purchase Line]
                                     WHERE [Document Type] = [{Datos.Company}$Purchase Header].[Document Type] and [Document No_] = [{Datos.Company}$Purchase Header].[No_])";
+
+            //AND[No_] = '5538'
 
             Sql s = new Sql();
             await s.Cargar_TableData(Datos, tt);
@@ -120,12 +122,12 @@ namespace VisanBC25
                         {
                             CounterOK++;
                             await Marcar_Documento_Exportado(Datos, s, int.Parse(row["Document Type"].ToString()), row["No_"].ToString());
-                            await Funciones.Log_Detalle(Datos, "Factura Venta", row["No_"].ToString(), "OK", "");
+                            await Funciones.Log_Detalle(Datos, "Factura Compra", row["No_"].ToString(), "OK", "");
                         }
                         else
                         {
-                            await Funciones.Insertar_Error(Datos, s, "Sales Header", row["No_"].ToString(), RespuestaWs.Respuesta);
-                            await Funciones.Log_Detalle(Datos, "Factura Venta", row["No_"].ToString(), "NOK", RespuestaWs.Respuesta);
+                            await Funciones.Insertar_Error(Datos, s, "Purchase Header", row["No_"].ToString(), RespuestaWs.Respuesta);
+                            await Funciones.Log_Detalle(Datos, "Factura Compra", row["No_"].ToString(), "NOK", RespuestaWs.Respuesta);
                         }
 
                         stop = DateTime.Now.TimeOfDay - start;
@@ -162,8 +164,5 @@ namespace VisanBC25
 
             return (true);
         }
-
-
-
     }
 }

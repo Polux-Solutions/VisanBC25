@@ -69,6 +69,7 @@ namespace VisanBC25
                     clave1 = "FA No_";
                     clave2 = "Depreciation Book Code";
                     tt = await Funciones.Crear_Select(Datos, tabla);
+                    //tt += $" Where [FA No_] = 'AF000005'";
                     break;
                 case "PAISES": 
                     funcion = "Paises";
@@ -83,7 +84,7 @@ namespace VisanBC25
                     tablaId = 18;
                     clave1 = "No_";
                     tt = await Funciones.Crear_Select(Datos, tabla);
-                    //tt += $" WHERE [No_] = '40001'";
+                    //tt += $" WHERE [No_] IN  ('10220', '10215')";
                     break;
                 case "PROVEEDORES":
                     tabla = "Vendor";
@@ -124,6 +125,8 @@ namespace VisanBC25
 
                     tt = await Funciones.Crear_Select(Datos, tabla);
                     tt += $" WHERE EXISTS ( SELECT * FROM [{Datos.Company}$Customer] CU WHERE CU.[No_] = [Customer No_])";
+                    //tt += $" AND [Customer No_] IN  ('10220', '10215')";
+
                     break; ;
                 case "BANCOS-CLI":
                     tabla = "Customer Bank Account";
@@ -133,6 +136,8 @@ namespace VisanBC25
 
                     tt = await Funciones.Crear_Select(Datos, tabla);
                     tt += $" WHERE EXISTS ( SELECT * FROM [{Datos.Company}$Customer] CU WHERE CU.[No_] = [Customer No_])";
+                    //tt += $" AND [Customer No_] IN  ('10220', '10215')";
+
                     break;
                 case "BANCOS-PRO":
                     tabla = "Vendor Bank Account";

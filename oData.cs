@@ -99,7 +99,8 @@ namespace VisanBC25
             webRequest.ContentType = "application/json;charset=\"utf-8\"";
             webRequest.Accept = "application/json";
             webRequest.Method = "POST";
-            webRequest.Timeout = 60000;
+            webRequest.Timeout = 180000;
+            webRequest.ReadWriteTimeout = 180000;
             return webRequest;
         }
     }

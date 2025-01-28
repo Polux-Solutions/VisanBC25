@@ -42,8 +42,8 @@ namespace VisanBC25
             Console.Clear();
             Console.WriteLine(" 0. Test");
             Console.WriteLine(new string('-', 80));
-            Console.WriteLine(" 1. Formas y Términos de Pago\t\t\t\t3. VAT Posting Setup");
-            Console.WriteLine(" 2. Países\t\t\t\t4. FA Posting Group");
+            Console.WriteLine(" 1. Formas y Términos de Pago\t\t 3. VAT Posting Setup");
+            Console.WriteLine(" 2. Países\t\t\t\t 4. FA Posting Group");
             Console.WriteLine(new string('-', 80));
             Console.WriteLine("10. Clientes\t\t\t\t15. AF Depr. Book");
             Console.WriteLine("11. Provedores\t\t\t\t16. Dir. Envío");
@@ -53,10 +53,11 @@ namespace VisanBC25
             Console.WriteLine(new string('-', 80));
             Console.WriteLine("50. Facturas Venta\t\t\t51. Facturas Compra");
             Console.WriteLine("52. Diario\t\t\t\t59. Diario Saldos Iniciales");
+            Console.WriteLine("53. Remesas\t\t\t\t54. Órdenes de Pago");
             Console.WriteLine(new string('-', 80));
             Console.WriteLine("99. Salir");
             Console.WriteLine(new string('-', 80));
-            Console.WriteLine("(+) al final = Borrar Datos Existentes (3+)");
+            Console.WriteLine("(+) al final = Borrar Datos Existentes");
             Console.WriteLine();
             Console.Write("Pulse Opción: ");
             
@@ -91,6 +92,8 @@ namespace VisanBC25
                 case "50": return $"FAC-V{Borrar}";
                 case "51": return $"FAC-C{Borrar}";
                 case "52": return $"DIARIO{Borrar}";
+                case "53": return $"REMESA{Borrar}";
+                case "54": return $"OPAGO{Borrar}";
                 case "59": return $"SALDOS{Borrar}";
             }
 
@@ -325,6 +328,7 @@ namespace VisanBC25
             //xJson = xJson.Replace(@"\", "");
             xJson = xJson.Replace(@"""Lineas"": ""[{ ", @"""Lineas"": [{ ");
             xJson = xJson.Replace(@"}]""", @"}]");
+            xJson = xJson.Replace(@"'", "");
 
             return (xJson);   
         }
