@@ -36,7 +36,28 @@ namespace VisanBC25
 
                 switch (Comando)
                 {
+                    case "TEST" or "FPAGO" or "PAISES" or "CLIENTES" or "PROVEEDORES" or "BANCOS" or "ACTIVOS" or "CUENTAS" or "DIRECCIONES" or "BANCOS-CLI"
+                        or "BANCOS-PRO" or "VAT-SETUP" or "FA-POST" or "FA-BOOK" or "DIARIO" or "SALDOS" or "FAC-V" or "FAC-C" or "REMESA" or "OPAGO":
+                        if (!Funciones.Leer_Parametros(ref Datos, "GL"))
+                        {
+                            Console.WriteLine($"Error Lectura parámetros: {Datos.Error}");
+                        }
+                        break;
+                    case "ITEM" or "ITEM-TEST":
+                        if (!Funciones.Leer_Parametros(ref Datos, "ITEM"))
+                        {
+                            Console.WriteLine($"Error Lectura parámetros: {Datos.Error}");
+                        }
+                        break;
+                }
+
+
+                switch (Comando)
+                {
                     case "TEST":
+                        Datos = await Test(Datos);
+                        break;
+                    case "ITEM-TEST":
                         Datos = await Test(Datos);
                         break;
                     case "FPAGO":
@@ -74,6 +95,10 @@ namespace VisanBC25
                     case "OPAGO":
                         Cartera h = new Cartera();
                         await h.Traspasar_Ordenes_Pago(Datos, Borrar);
+                        break;
+                    case "ITEM":
+                        Item i = new Item();
+                        await i.Traspasar_Item(Datos, Borrar);
                         break;
                 }
 

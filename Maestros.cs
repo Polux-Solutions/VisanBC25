@@ -125,7 +125,7 @@ namespace VisanBC25
 
                     tt = await Funciones.Crear_Select(Datos, tabla);
                     tt += $" WHERE EXISTS ( SELECT * FROM [{Datos.Company}$Customer] CU WHERE CU.[No_] = [Customer No_])";
-                    //tt += $" AND [Customer No_] IN  ('10220', '10215')";
+                    //tt += $" AND [Customer No_] IN  ('6083', '6083') and [Code] = 'EL TORNO'";
 
                     break; ;
                 case "BANCOS-CLI":
@@ -178,7 +178,6 @@ namespace VisanBC25
 
             if (BorradoOK)
             {
-
                 Sql s = new Sql();
                 await s.Cargar_TableData(Datos, tt);
                 if (s.mSql.Estado)
@@ -211,6 +210,8 @@ namespace VisanBC25
                             Funciones.Crear_Diccionario(ref rowAsDictionary, row, s.mSql.TableData);
 
                             string xjson = JsonConvert.SerializeObject(rowAsDictionary, Formatting.Indented);
+                            xjson = Funciones.Limpiar_Lineas_json(xjson);
+
                             m_Respuesta RespuestaWs = new m_Respuesta();
 
                             RespuestaWs = await oData.WsJson(Datos, xjson, funcion);

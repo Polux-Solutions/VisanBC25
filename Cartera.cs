@@ -72,6 +72,8 @@ namespace VisanBC25
 
                     Console.WriteLine($"\r\n\r\n");
 
+                    if (s.mSql.TableData.Rows.Count == 0) Console.WriteLine($"No hay remesas pendientes de transferir\r\n\r\n");
+
                     for (int i = 0; i < s.mSql.TableData.Rows.Count; i++)
                     {
                         Counter++;
@@ -80,7 +82,7 @@ namespace VisanBC25
                         Funciones.Clear_Row(ref row, s.mSql.TableData);
 
                         Sql t = new Sql();
-                        tt = @$"SELECT CD.[Entry No_], CD.[Document No_], CD.[No_], CD.[Account No_], CD.[Remaining Amount] 
+                        tt = @$"SELECT CD.[Entry No_], CD.[Document No_], CD.[No_], CD.[Account No_], CD.[Remaining Amount], CD.[Cust__Vendor Bank Acc_ Code] 
                                   FROM [{Datos.Company}$Cartera Doc_] CD
                                   WHERE CD.[Type] = 0 AND CD.[Bill Gr__Pmt_ Order No_] = '{row["No_"].ToString()}'";
 
@@ -189,7 +191,7 @@ namespace VisanBC25
             }
 
             string tt = await Funciones.Crear_Select(Datos, "Payment Order");
-            tt += @$" WHERE [Exportado BC25] = 0 AND YEAR([Posting Date])>=2025";
+            tt += @$" WHERE [Exportado BC25] IN (0) AND YEAR([Posting Date])>=2025";
 
             //AND[No_] IN('25/A-00001', '25/AB-A-0000X5')
 
@@ -204,6 +206,8 @@ namespace VisanBC25
 
                     Console.WriteLine($"\r\n\r\n");
 
+                    if (s.mSql.TableData.Rows.Count == 0) Console.WriteLine($"No hay Órdenes de Pago pendientes de transferir\r\n\r\n");
+
                     for (int i = 0; i < s.mSql.TableData.Rows.Count; i++)
                     {
                         Counter++;
@@ -212,7 +216,7 @@ namespace VisanBC25
                         Funciones.Clear_Row(ref row, s.mSql.TableData);
 
                         Sql t = new Sql();
-                        tt = @$"SELECT CD.[Entry No_], CD.[Document No_], CD.[No_], CD.[Account No_], CD.[Remaining Amount] 
+                        tt = @$"SELECT CD.[Entry No_], CD.[Document No_], CD.[No_], CD.[Account No_], CD.[Remaining Amount], CD.[Cust__Vendor Bank Acc_ Code]
                                   FROM [{Datos.Company}$Cartera Doc_] CD
                                   WHERE CD.[Type] = 1 AND CD.[Bill Gr__Pmt_ Order No_] = '{row["No_"].ToString()}'";
 
@@ -250,7 +254,7 @@ namespace VisanBC25
                         xjson = Funciones.Limpiar_Lineas_json(xjson);
 
                         m_Respuesta RespuestaWs = new m_Respuesta();
-                        RespuestaWs = await oData.WsJson(Datos, xjson, "Remesas");
+                        RespuestaWs = await oData.WsJson(Datos, xjson, "Ordenes_Pago");
 
                         if (RespuestaWs.Ok)
                         {

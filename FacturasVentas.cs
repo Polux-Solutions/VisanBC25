@@ -57,7 +57,7 @@ namespace VisanBC25
             }
 
             string tt = await Funciones.Crear_Select(Datos, "Sales Header");
-            tt += @$" WHERE [Document Type] in (2,3) AND [Exportado BC25] = 0 AND YEAR([Posting Date])>=2025
+            tt += @$" WHERE [Document Type] in (2,3) AND [Exportado BC25] IN (0) AND YEAR([Posting Date])>=2025
                      AND EXISTS ( SELECT * FROM [{Datos.Company}$Sales Line]
                                     WHERE [Document Type] = [{Datos.Company}$Sales Header].[Document Type] and [Document No_] = [{Datos.Company}$Sales Header].[No_])";
 
@@ -74,6 +74,8 @@ namespace VisanBC25
                     DataRow row = null;
 
                     Console.WriteLine($"\r\n\r\n");
+                    if (s.mSql.TableData.Rows.Count == 0) Console.WriteLine($"No hay facturas de Venta pendientes de transferir\r\n\r\n");
+
 
                     for (int i = 0; i < s.mSql.TableData.Rows.Count; i++)
                     {
@@ -151,7 +153,6 @@ namespace VisanBC25
 
             return (Datos);
         }
-
 
         private async Task<bool> Marcar_Documento_Exportado(m_Datos Datos, Sql s, int xDocumentType, string xFacturaNo)
         {

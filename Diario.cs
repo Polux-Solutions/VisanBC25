@@ -66,11 +66,11 @@ namespace VisanBC25
 
             if (Saldos)
             {
-                tt += $" WHERE [Exportado BC25] = 0 AND [Document No_] <> '' AND [Journal Batch Name] IN ('MIGRACION', 'MIGRACPROV')";
+                tt += $" WHERE [Exportado BC25] IN (0) AND [Document No_] <> '' AND [Journal Batch Name] IN ('MIGRACION', 'MIGRACPROV')";
             }
             else
             {
-                tt += $" WHERE [Exportado BC25] = 0 AND [Document No_] <> '' AND NOT [Journal Batch Name] IN ('MIGRACION', 'MIGRACPROV') AND YEAR([Posting Date])>=2025";
+                tt += $" WHERE [Exportado BC25] IN (0) AND [Document No_] <> '' AND NOT [Journal Batch Name] IN ('MIGRACION', 'MIGRACPROV') AND YEAR([Posting Date])>=2025";
             }
 
             Sql s = new Sql();
@@ -81,14 +81,20 @@ namespace VisanBC25
                 {
                     Console.WriteLine($"\r\n\r\n");
 
+                    if (s.mSql.TableData.Rows.Count == 0) Console.WriteLine($"No hay Líneas de diario pendientes de transferir\r\n\r\n");
+
                     foreach (DataRow row in s.mSql.TableData.Rows)
                     {
                         Counter++;
+
+                        row["Description"] = row["Description"].ToString().Replace("\"", "");
 
                         Dictionary<string, object> rowAsDictionary = new Dictionary<string, object>();
                         Funciones.Crear_Diccionario(ref rowAsDictionary, row, s.mSql.TableData);
 
                         string xjson = JsonConvert.SerializeObject(rowAsDictionary, Formatting.Indented);
+                        xjson = Funciones.Limpiar_Lineas_json(xjson);
+
                         m_Respuesta RespuestaWs = new m_Respuesta();
                         RespuestaWs = await oData.WsJson(Datos, xjson, "Diario");
                         if (RespuestaWs.Ok)

@@ -59,10 +59,11 @@ namespace VisanBC25
 
             string tt = await Funciones.Crear_Select(Datos, "Purchase Header");
             tt += @$" WHERE [Document Type] in (2,3) AND [Exportado BC25] in (0) AND YEAR([Posting Date])>=2025
+
                         AND EXISTS ( SELECT * FROM [{Datos.Company}$Purchase Line]
                                     WHERE [Document Type] = [{Datos.Company}$Purchase Header].[Document Type] and [Document No_] = [{Datos.Company}$Purchase Header].[No_])";
 
-            //AND[No_] = '5538'
+            //AND[No_] = 'FC158674'
 
             Sql s = new Sql();
             await s.Cargar_TableData(Datos, tt);
@@ -74,6 +75,8 @@ namespace VisanBC25
                     DataRow row = null;
 
                     Console.WriteLine($"\r\n\r\n");
+
+                    if (s.mSql.TableData.Rows.Count == 0) Console.WriteLine($"No hay facturas de Compra pendientes de transferir\r\n\r\n");
 
                     for (int i = 0; i < s.mSql.TableData.Rows.Count; i++)
                     {

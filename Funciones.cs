@@ -37,9 +37,10 @@ namespace VisanBC25
 
 
 
-        public static string Menu(ref m_Datos Datos)
+        public static string Menu(string Version)
         {
             Console.Clear();
+            Console.WriteLine($"{new string('-', 70)}{Version}");
             Console.WriteLine(" 0. Test");
             Console.WriteLine(new string('-', 80));
             Console.WriteLine(" 1. Formas y Términos de Pago\t\t 3. VAT Posting Setup");
@@ -54,6 +55,9 @@ namespace VisanBC25
             Console.WriteLine("50. Facturas Venta\t\t\t51. Facturas Compra");
             Console.WriteLine("52. Diario\t\t\t\t59. Diario Saldos Iniciales");
             Console.WriteLine("53. Remesas\t\t\t\t54. Órdenes de Pago");
+            Console.WriteLine(new string('-', 80));
+            Console.WriteLine(new string('-', 80));
+            Console.WriteLine("60. Productos\t\t\t69.Item Test");
             Console.WriteLine(new string('-', 80));
             Console.WriteLine("99. Salir");
             Console.WriteLine(new string('-', 80));
@@ -95,13 +99,15 @@ namespace VisanBC25
                 case "53": return $"REMESA{Borrar}";
                 case "54": return $"OPAGO{Borrar}";
                 case "59": return $"SALDOS{Borrar}";
+                case "60": return $"ITEM{Borrar}";
+                case "69": return $"ITEM-TEST";
             }
 
             return "ERROR";
         }
 
 
-        public static bool Leer_Parametros(ref m_Datos Datos)
+        public static bool Leer_Parametros(ref m_Datos Datos, string Opcion)
         {
             bool OK = true;
 
@@ -113,18 +119,37 @@ namespace VisanBC25
                 Datos.LogDetalle = System.Configuration.ConfigurationManager.AppSettings["LOG-DETALLE"];
                 Datos.Version = System.Configuration.ConfigurationManager.AppSettings["VERSION"];
                 Datos.User = System.Configuration.ConfigurationManager.AppSettings["USER"]; ;
-                Datos.Password = System.Configuration.ConfigurationManager.AppSettings["PASSWORD"]; ;
-                Datos.Company = System.Configuration.ConfigurationManager.AppSettings["COMPANY"]; ;
-                Datos.CompanyWeb = System.Configuration.ConfigurationManager.AppSettings["COMPANY-WEB"]; ;
-                Datos.Server = System.Configuration.ConfigurationManager.AppSettings["SERVER"]; ;
-                Datos.Database = System.Configuration.ConfigurationManager.AppSettings["DATABASE"]; ;
-                Datos.ServerWeb= System.Configuration.ConfigurationManager.AppSettings["SERVER-WEB"]; ;
-                Datos.Puerto= int.Parse( System.Configuration.ConfigurationManager.AppSettings["PUERTO"]);
-                Datos.Instancia = System.Configuration.ConfigurationManager.AppSettings["INSTANCIA"]; ;
-                Datos.Codeunit = System.Configuration.ConfigurationManager.AppSettings["CODEUNIT"]; ;
-                Datos.UserBC = System.Configuration.ConfigurationManager.AppSettings["USER-BC"]; ;
-                Datos.PasswdBC = System.Configuration.ConfigurationManager.AppSettings["PASSWD-BC"]; ;
-                Datos.DomainBC = System.Configuration.ConfigurationManager.AppSettings["DOMAIN-BC"]; ;
+                Datos.Password = System.Configuration.ConfigurationManager.AppSettings["PASSWORD"]; 
+
+                Datos.Server = System.Configuration.ConfigurationManager.AppSettings["SERVER"]; 
+                Datos.Database = System.Configuration.ConfigurationManager.AppSettings["DATABASE"];
+
+                if (Opcion == "GL")
+                {
+                    Datos.Company = System.Configuration.ConfigurationManager.AppSettings["GL-COMPANY"];
+                    Datos.CompanyWeb = System.Configuration.ConfigurationManager.AppSettings["GL-COMPANY-WEB"];
+                    Datos.Codeunit = System.Configuration.ConfigurationManager.AppSettings["GL-CODEUNIT"];
+                    Datos.ServerWeb = System.Configuration.ConfigurationManager.AppSettings["GL-SERVER-WEB"];
+                    Datos.Puerto = int.Parse(System.Configuration.ConfigurationManager.AppSettings["GL-PUERTO"]);
+                    Datos.UserBC = System.Configuration.ConfigurationManager.AppSettings["GL-USER-BC"]; ;
+                    Datos.PasswdBC = System.Configuration.ConfigurationManager.AppSettings["GL-PASSWD-BC"];
+                    Datos.DomainBC = System.Configuration.ConfigurationManager.AppSettings["GL-DOMAIN-BC"];
+                    Datos.Instancia = System.Configuration.ConfigurationManager.AppSettings["GL-INSTANCIA"];
+                }
+
+                if (Opcion == "ITEM")
+                {
+                    Datos.Company = System.Configuration.ConfigurationManager.AppSettings["ITEM-COMPANY"];
+                    Datos.CompanyWeb = System.Configuration.ConfigurationManager.AppSettings["ITEM-COMPANY-WEB"];
+                    Datos.Codeunit = System.Configuration.ConfigurationManager.AppSettings["ITEM-CODEUNIT"];
+                    Datos.ServerWeb = System.Configuration.ConfigurationManager.AppSettings["ITEM-SERVER-WEB"];
+                    Datos.Puerto = int.Parse(System.Configuration.ConfigurationManager.AppSettings["ITEM-PUERTO"]);
+                    Datos.UserBC = System.Configuration.ConfigurationManager.AppSettings["ITEM-USER-BC"]; ;
+                    Datos.PasswdBC = System.Configuration.ConfigurationManager.AppSettings["ITEM-PASSWD-BC"];
+                    Datos.DomainBC = System.Configuration.ConfigurationManager.AppSettings["ITEM-DOMAIN-BC"];
+                    Datos.Instancia = System.Configuration.ConfigurationManager.AppSettings["ITEM-INSTANCIA"];
+                }
+
                 Datos.Estado = true;
             }
             catch (Exception ex)
@@ -305,8 +330,6 @@ namespace VisanBC25
                     row[n] = row[n].ToString().Replace(Convert.ToChar(34).ToString(), " ");
                 }
             }
-
-
         }
 
         public static void Crear_Diccionario(ref Dictionary<string, object> rowAsDictionary, DataRow row, DataTable TableData )
@@ -329,6 +352,7 @@ namespace VisanBC25
             xJson = xJson.Replace(@"""Lineas"": ""[{ ", @"""Lineas"": [{ ");
             xJson = xJson.Replace(@"}]""", @"}]");
             xJson = xJson.Replace(@"'", "");
+            xJson = xJson.Replace(@"\\", @"/");
 
             return (xJson);   
         }
