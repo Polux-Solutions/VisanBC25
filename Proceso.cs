@@ -37,13 +37,13 @@ namespace VisanBC25
                 switch (Comando)
                 {
                     case "TEST" or "FPAGO" or "PAISES" or "CLIENTES" or "PROVEEDORES" or "BANCOS" or "ACTIVOS" or "CUENTAS" or "DIRECCIONES" or "BANCOS-CLI"
-                        or "BANCOS-PRO" or "VAT-SETUP" or "FA-POST" or "FA-BOOK" or "DIARIO" or "SALDOS" or "FAC-V" or "FAC-C" or "REMESA" or "OPAGO":
+                        or "BANCOS-PRO" or "VAT-SETUP" or "FA-POST" or "FA-BOOK" or "DIARIO" or "SALDOS" or "FAC-V" or "FAC-C" or "REMESA" or "OPAGO" or "COSTE-AF":
                         if (!Funciones.Leer_Parametros(ref Datos, "GL"))
                         {
                             Console.WriteLine($"Error Lectura parámetros: {Datos.Error}");
                         }
                         break;
-                    case "ITEM" or "ITEM-TEST":
+                    case "ITEM-B" or "ITEM-C" or "ITEM-TEST" or "ITEM-J":
                         if (!Funciones.Leer_Parametros(ref Datos, "ITEM"))
                         {
                             Console.WriteLine($"Error Lectura parámetros: {Datos.Error}");
@@ -80,6 +80,10 @@ namespace VisanBC25
                         Diario s = new Diario();
                         await s.Traspasar_Diario(Datos, true, Borrar);
                         break;
+                    case "COSTE-AF":
+                        AF aF = new AF();
+                        await aF.Traspasar_Coste(Datos, Borrar);
+                        break;
                     case "FAC-V":
                         FacturasVentas e = new FacturasVentas();
                         await e.Traspasar_Facturas_Ventas(Datos, Borrar);
@@ -96,10 +100,19 @@ namespace VisanBC25
                         Cartera h = new Cartera();
                         await h.Traspasar_Ordenes_Pago(Datos, Borrar);
                         break;
-                    case "ITEM":
+                    case "ITEM-B":
                         Item i = new Item();
-                        await i.Traspasar_Item(Datos, Borrar);
+                        await i.Traspasar_Item(Datos, false, Borrar, false);
                         break;
+                    case "ITEM-J":
+                        Item k = new Item();
+                        await k.Traspasar_Item(Datos, false, false, true);
+                        break;
+                    case "ITEM-C":
+                        Item j = new Item();
+                        await j.Traspasar_Item(Datos, true, Borrar, false);
+                        break;
+
                 }
 
                 if (!Datos.Estado)

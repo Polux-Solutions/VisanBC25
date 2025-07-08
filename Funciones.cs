@@ -1,21 +1,6 @@
-﻿using VisanBC25.Modelos;
-using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Data;
-using System.Linq;
-using System.Runtime.Remoting;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Drawing;
+﻿using System.Data;
 using System.Diagnostics;
-using Microsoft.Extensions.Primitives;
-using System.Data.Common;
-using Newtonsoft.Json;
-using static System.Net.Mime.MediaTypeNames;
-using Microsoft.Win32;
-using System.Threading.Tasks.Sources;
+using VisanBC25.Modelos;
 
 namespace VisanBC25
 {
@@ -57,14 +42,18 @@ namespace VisanBC25
             Console.WriteLine("53. Remesas\t\t\t\t54. Órdenes de Pago");
             Console.WriteLine(new string('-', 80));
             Console.WriteLine(new string('-', 80));
-            Console.WriteLine("60. Productos\t\t\t69.Item Test");
+            Console.WriteLine("60. Productos Básica \t\t\t61.Productos Completa");
+            Console.WriteLine("62. Productos Completa json");
+            Console.WriteLine("69. Item Test");
+            Console.WriteLine(new string('-', 80));
+            Console.WriteLine("70. Coste y Amortización AF");
             Console.WriteLine(new string('-', 80));
             Console.WriteLine("99. Salir");
             Console.WriteLine(new string('-', 80));
             Console.WriteLine("(+) al final = Borrar Datos Existentes");
             Console.WriteLine();
             Console.Write("Pulse Opción: ");
-            
+
             string Opc = Console.ReadLine();
             if (string.IsNullOrEmpty(Opc)) Opc = "99";
 
@@ -99,7 +88,10 @@ namespace VisanBC25
                 case "53": return $"REMESA{Borrar}";
                 case "54": return $"OPAGO{Borrar}";
                 case "59": return $"SALDOS{Borrar}";
-                case "60": return $"ITEM{Borrar}";
+                case "60": return $"ITEM-B{Borrar}";
+                case "61": return $"ITEM-C{Borrar}";
+                case "62": return $"ITEM-J{Borrar}";
+                case "70": return $"COSTE-AF{Borrar}";
                 case "69": return $"ITEM-TEST";
             }
 
@@ -119,9 +111,9 @@ namespace VisanBC25
                 Datos.LogDetalle = System.Configuration.ConfigurationManager.AppSettings["LOG-DETALLE"];
                 Datos.Version = System.Configuration.ConfigurationManager.AppSettings["VERSION"];
                 Datos.User = System.Configuration.ConfigurationManager.AppSettings["USER"]; ;
-                Datos.Password = System.Configuration.ConfigurationManager.AppSettings["PASSWORD"]; 
+                Datos.Password = System.Configuration.ConfigurationManager.AppSettings["PASSWORD"];
 
-                Datos.Server = System.Configuration.ConfigurationManager.AppSettings["SERVER"]; 
+                Datos.Server = System.Configuration.ConfigurationManager.AppSettings["SERVER"];
                 Datos.Database = System.Configuration.ConfigurationManager.AppSettings["DATABASE"];
 
                 if (Opcion == "GL")
@@ -161,7 +153,7 @@ namespace VisanBC25
         }
 
 
-        public static async Task <string> Log(m_Datos Datos,  string Texto)
+        public static async Task<string> Log(m_Datos Datos, string Texto)
         {
             string Estado = "OK";
             StreamWriter sr;
@@ -188,7 +180,7 @@ namespace VisanBC25
 
             try
             {
-                if (! File.Exists(Datos.LogDetalle))
+                if (!File.Exists(Datos.LogDetalle))
                 {
                     html = $@"<html><head></head><body><FONT FACE='Trebuchet' SIZE=4 COLOR=black><br/><br/><br/>
                             <table width= '800' border='1'><thead><tr>
@@ -218,7 +210,7 @@ namespace VisanBC25
             return Estado;
         }
 
-        public static async Task<string>Crear_Select(m_Datos Datos, string xTabla)
+        public static async Task<string> Crear_Select(m_Datos Datos, string xTabla)
         {
             string Campos = String.Empty;
             string SqlSelect = String.Empty;
@@ -232,7 +224,7 @@ namespace VisanBC25
             {
                 foreach (DataRow row in s.mSql.TableData.Rows)
                 {
-                    if (Campos.Length> 0) Campos += ",";
+                    if (Campos.Length > 0) Campos += ",";
                     Campos += $"[{row["CampoNav"]}]";
                 }
             }
@@ -269,34 +261,43 @@ namespace VisanBC25
         {
             bool vacia = false;
 
-            switch (column.DataType.Name)
+            try
             {
-                case "String": vacia = (row[column].ToString().Trim() == string.Empty);
-                    break;
-                case "Boolean" or "Byte":
-                    vacia = (int.Parse(row[column].ToString()) == 0);
-                    break;
-                case "Decimal":
-                    vacia = (decimal.Parse(row[column].ToString()) == 0);
-                    break;
-                case "Double":
-                    vacia = (double.Parse(row[column].ToString()) == 0);
-                    break;
-                case "Single":
-                    vacia = (Single.Parse(row[column].ToString()) == 0);
-                    break;
-                case "Int16":
-                    vacia = (Int16.Parse(row[column].ToString()) == 0);
-                    break;
-                case "Int32":
-                    vacia = (Int32.Parse(row[column].ToString()) == 0);
-                    break;
-                case "Int64":
-                    vacia = (Int64.Parse(row[column].ToString()) == 0);
-                    break;
-                case "DateTime":
-                    vacia = (DateTime.Parse(row[column].ToString()).Year < 2000);
-                    break;
+                switch (column.DataType.Name)
+                {
+                    case "String":
+                        vacia = (row[column].ToString().Trim() == string.Empty);
+                        break;
+                    case "Boolean" or "Byte":
+                        vacia = (int.Parse(row[column].ToString()) == 0);
+                        break;
+                    case "Decimal":
+                        vacia = (decimal.Parse(row[column].ToString()) == 0);
+                        break;
+                    case "Double":
+                        vacia = (double.Parse(row[column].ToString()) == 0);
+                        break;
+                    case "Single":
+                        vacia = (Single.Parse(row[column].ToString()) == 0);
+                        break;
+                    case "Int16":
+                        vacia = (Int16.Parse(row[column].ToString()) == 0);
+                        break;
+                    case "Int32":
+                        vacia = (Int32.Parse(row[column].ToString()) == 0);
+                        break;
+                    case "Int64":
+                        vacia = (Int64.Parse(row[column].ToString()) == 0);
+                        break;
+                    case "DateTime":
+                        vacia = (DateTime.Parse(row[column].ToString()).Year < 2000);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                vacia = true;
+                Funciones.Log(new m_Datos(), $"Error al comprobar si columna {column.ColumnName} está vacía: {ex.Message}");
             }
 
             return vacia;
@@ -320,7 +321,7 @@ namespace VisanBC25
         {
             int n = -1;
 
-            foreach(DataColumn column in TableData.Columns)
+            foreach (DataColumn column in TableData.Columns)
             {
                 n++;
 
@@ -332,16 +333,28 @@ namespace VisanBC25
             }
         }
 
-        public static void Crear_Diccionario(ref Dictionary<string, object> rowAsDictionary, DataRow row, DataTable TableData )
+        public static void Crear_Diccionario(ref Dictionary<string, object> rowAsDictionary, DataRow row, DataTable TableData)
         {
             rowAsDictionary = new Dictionary<string, object>();
 
-            foreach (DataColumn column in TableData.Columns)
+            string columna = string.Empty;
+            try
             {
-                if (!Funciones.Columna_Vacia(row, column))
+                foreach (DataColumn column in TableData.Columns)
                 {
-                    rowAsDictionary[Funciones.Nombres_Columnas(column.ColumnName)] = row[column];
+                    columna = column.ColumnName;
+                    if (!row.IsNull(column))
+                    {
+                        if (!Funciones.Columna_Vacia(row, column))
+                        {
+                            rowAsDictionary[Funciones.Nombres_Columnas(column.ColumnName)] = row[column].ToString();
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                string error = $"Error al crear diccionario de la fila {columna}: {ex.Message}";
             }
         }
 
@@ -349,12 +362,13 @@ namespace VisanBC25
         {
             xJson = xJson.Replace(@"\r\n", "");
             //xJson = xJson.Replace(@"\", "");
-            xJson = xJson.Replace(@"""Lineas"": ""[{ ", @"""Lineas"": [{ ");
+            xJson = xJson.Replace(@"""UD"": ""[{ ", @"""UD"": [{ ");
             xJson = xJson.Replace(@"}]""", @"}]");
+            xJson = xJson.Replace(@"""[{", @"[{");
             xJson = xJson.Replace(@"'", "");
             xJson = xJson.Replace(@"\\", @"/");
 
-            return (xJson);   
+            return (xJson);
         }
     }
 }

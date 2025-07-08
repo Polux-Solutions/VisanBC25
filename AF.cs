@@ -20,58 +20,45 @@ using System.Diagnostics.Metrics;
 
 namespace VisanBC25
 {
-    public class Diario
+    public class AF
     {
-        public async Task<m_Datos> Traspasar_Diario(m_Datos Datos, bool Saldos, bool Borrar)
+        public async Task<m_Datos> Traspasar_Coste(m_Datos Datos, bool Borrar)
         {
             int Counter = 0;
             int CounterOK = 0;
             TimeSpan start = DateTime.Now.TimeOfDay;
             TimeSpan stop = DateTime.Now.TimeOfDay;
 
-            if (Saldos || Borrar)
+            Datos.Company = "VISAN Ind_ zootécnicas, S_L_";
+
+            if (Borrar)
             {
                 m_Borrar BorrarClass = new m_Borrar();
 
                 string xjson = JsonConvert.SerializeObject(BorrarClass, Formatting.Indented);
                 m_Respuesta RespuestaWs = new m_Respuesta();
 
-                if (Saldos)
-                {
-                    RespuestaWs = await oData.WsJson(Datos, xjson, "Borrar_Diario_Saldos");
-                }
-                else
-                {
-                    RespuestaWs = await oData.WsJson(Datos, xjson, "Borrar_Diario");
-                }
+                RespuestaWs = await oData.WsJson(Datos, xjson, "Borrar_Diario_AF");
 
                 if (RespuestaWs.Ok)
                 {
                     Console.WriteLine($"\r\n\r\nBorrados: {RespuestaWs.Respuesta} Registros");
-                    await Funciones.Log(Datos, $"Borrar Diario: {RespuestaWs.Respuesta} Borrados");
+                    await Funciones.Log(Datos, $"Borrar Diario AF: {RespuestaWs.Respuesta} Borrados");
 
                 }
                 else
                 {
-                    Console.WriteLine($"\r\n\r\nNo se han podido Borrar Registros: {RespuestaWs.Respuesta}");
-                    await Funciones.Log(Datos, $"Error Borrando Diario (Saldos={Saldos}): {RespuestaWs.Respuesta}");
+                    Console.WriteLine($"\r\n\r\nNo se han podido Borrar Registros AF: {RespuestaWs.Respuesta}");
+                    await Funciones.Log(Datos, $"Error Borrando Diario AF: {RespuestaWs.Respuesta}");
                     Datos.Estado = false;
-                    Datos.Error = $"No se han podido Borrar Registros: {RespuestaWs.Respuesta}";
+                    Datos.Error = $"No se han podido Borrar Registros Diario AF: {RespuestaWs.Respuesta}";
                     return Datos;
                 }
             }
 
 
-            string tt = await Funciones.Crear_Select(Datos, "Gen_ Journal Line");
-
-            if (Saldos)
-            {
-                tt += $" WHERE [Exportado BC25] IN (0) AND [Document No_] <> '' AND [Journal Batch Name] IN ('MIGRACION', 'MIGRACPROV')";
-            }
-            else
-            {
-                tt += $" WHERE [Exportado BC25] IN (0) AND [Document No_] <> '' AND NOT [Journal Batch Name] IN ('MIGRACION', 'MIGRACPROV') AND YEAR([Posting Date])>=2025";
-            }
+            string tt = $"SELECT [FA No_], [Fecha Ult Amortizacion BC], [Acquisition Date], [Last Acquisition Cost Date], [Last Depreciation Date], [Acquisition Cost], [Depreciation] " +
+                        $" FROM [{Datos.Company}$Saldos amortiza Migrac] WHERE [Exportado BC25] IN (0)";
 
             Sql s = new Sql();
             await s.Cargar_TableData(Datos, tt);
@@ -81,13 +68,11 @@ namespace VisanBC25
                 {
                     Console.WriteLine($"\r\n\r\n");
 
-                    if (s.mSql.TableData.Rows.Count == 0) Console.WriteLine($"No hay Líneas de diario pendientes de transferir\r\n\r\n");
+                    if (s.mSql.TableData.Rows.Count == 0) Console.WriteLine($"No hay Líneas de coste para transferir\r\n\r\n");
 
                     foreach (DataRow row in s.mSql.TableData.Rows)
                     {
                         Counter++;
-
-                        row["Description"] = row["Description"].ToString().Replace("\"", "");
 
                         Dictionary<string, object> rowAsDictionary = new Dictionary<string, object>();
                         Funciones.Crear_Diccionario(ref rowAsDictionary, row, s.mSql.TableData);
@@ -96,14 +81,14 @@ namespace VisanBC25
                         xjson = Funciones.Limpiar_Lineas_json(xjson);
 
                         m_Respuesta RespuestaWs = new m_Respuesta();
-                        RespuestaWs = await oData.WsJson(Datos, xjson, "Diario");
+                        RespuestaWs = await oData.WsJson(Datos, xjson, "Diario_AF");
                         if (RespuestaWs.Ok)
                         {
                             CounterOK++;
-                            await Marcar_Diario_Exportado(Datos, s, row["Journal Template Name"].ToString(), row["Journal Batch Name"].ToString(), int.Parse(row["Line No_"].ToString()));
+                            await Marcar_Diario_AF_Exportado(Datos, s, row["FA No_"].ToString());
                         }
                         else
-                            await Funciones.Insertar_Error(Datos, s, "Gen. Journal Line", row["Line No_"].ToString(), RespuestaWs.Respuesta);
+                            await Funciones.Insertar_Error(Datos, s, "Saldos amortiza Migrac", row["FA No_"].ToString(), RespuestaWs.Respuesta);
 
 
                         if (Counter % 10 == 0)
@@ -134,13 +119,11 @@ namespace VisanBC25
         }
 
 
-        private async Task<bool>Marcar_Diario_Exportado(m_Datos Datos, Sql s, string xTemplate, string xBatch, int xLinea)
+        private async Task<bool>Marcar_Diario_AF_Exportado(m_Datos Datos, Sql s, string xAF)
         {
-            string tt = $@"UPDATE [{Datos.Company}$Gen_ Journal Line]  
+            string tt = $@"UPDATE [{Datos.Company}$Saldos amortiza Migrac]  
                             SET [Exportado BC25] = 1
-                            WHERE [Journal Template Name] = '{xTemplate}'                             
-                              AND [Journal Batch Name] = '{xBatch}' 
-                              AND [Line No_] = {xLinea.ToString()}";
+                            WHERE [FA No_] = '{xAF}'";
 
             if (!await s.Ejecutar_SQL(Datos, tt))
             {
